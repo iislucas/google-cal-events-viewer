@@ -1,0 +1,42 @@
+<div *ngIf="errorMessage" class="error-message">
+  <p>{{ errorMessage }}</p>
+</div>
+
+<div *ngIf="showInputFields">
+  <div>
+    <label for="calendarId">Calendar ID:</label>
+    <input
+      id="calendarId"
+      [(ngModel)]="inputCalendarId"
+      placeholder="Enter Calendar ID"
+    />
+  </div>
+  <div>
+    <label for="apiKey">API Key:</label>
+    <input id="apiKey" [(ngModel)]="inputApiKey" placeholder="Enter API Key" />
+  </div>
+  <button (click)="submitParameters()">Fetch Events</button>
+</div>
+
+<div *ngIf="events.length === 0 && !errorMessage && !showInputFields">
+  <p>No events found</p>
+</div>
+
+<div *ngIf="events.length > 0 && !showInputFields">
+  <ul>
+    <li *ngFor="let event of events">
+      <h3>{{ event.title }}</h3>
+      <p>
+        @if(event.start === event.end) {
+        {{ event.start | date : "longDate" }}
+        } @else {
+        <span>{{ event.start | date : "longDate" }}</span> -
+        <span>{{ event.end | date : "longDate" }}</span>
+        }
+      </p>
+      <p>
+        <span [innerHTML]="event.description"></span>
+      </p>
+    </li>
+  </ul>
+</div>
