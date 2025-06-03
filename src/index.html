@@ -1,13 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>GoogleCalEventsViewer</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
-  <app-root></app-root>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <base href="./" />
+    <title>GoogleCalEventsViewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+  <body>
+    <app-root></app-root>
+
+    <script>
+      /**
+       * Sends the current scroll height of the document to the parent window.
+       * @param {string} frameId - An optional ID to help the parent identify which iframe is sending the message.
+       * @param {string} targetOrigin - The origin of the parent window. Use '*' for any origin (less secure),
+       * or specify the exact origin of your parent page for better security.
+       */
+      function postIframeHeight(
+        frameId = "myCalendarViewer",
+        targetOrigin = "*"
+      ) {
+        // Get the total height of the document body, including padding and margins.
+        // document.documentElement.scrollHeight is often more reliable than document.body.scrollHeight
+        // as body's height might not always reflect the full content height accurately across browsers.
+        const height = document.documentElement.scrollHeight;
+
+        // Send the message to the parent window
+        if (window.parent) {
+          window.parent.postMessage(
+            {
+              type: "iframeHeight", // Custom type to identify our message
+              frameId: frameId, // So the parent knows which iframe it is
+              height: height, // The actual height value
+            },
+            targetOrigin
+          );
+        }
+      }
+
+      // --- Event Listeners to send height ---
+
+      // 1. Send height on initial load
+      window.addEventListener("load", () => {
+        postIframeHeight();
+      });
+
+      // 2. Send height on window resize (important for responsive content)
+      // Debounce to prevent excessive calls during resizing
+      let resizeTimer;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          postIframeHeight();
+        }, 100); // Wait 100ms after resize stops
+      });
+
+      // 3. (Optional) Send height after content changes dynamically
+      function addMoreContent() {
+        const newParagraph = document.createElement("p");
+        newParagraph.textContent =
+          "Dynamically added content! This should make the iframe taller.";
+        document.body.appendChild(newParagraph);
+        postIframeHeight(); // Post height after content has changed
+      }
+
+      // Initial post in case 'load' event fires too late for some scenarios
+      postIframeHeight();
+    </script>
+  </body>
 </html>
