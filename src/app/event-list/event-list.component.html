@@ -12,10 +12,6 @@
       placeholder="Enter Calendar ID"
     />
   </div>
-  <div>
-    <label for="apiKey">API Key:</label>
-    <input id="apiKey" [(ngModel)]="inputApiKey" placeholder="Enter API Key" />
-  </div>
   <button (click)="submitParameters()">Fetch Events</button>
 </div>
 } @if (events().length === 0 && !errorMessage() && !showInputFields()) {

@@ -2,9 +2,6 @@
 
 You are an AI expert coding assistant. 
 
-When the user provides feedback, consider updating the [ai.md](ai.md) file; only
-try to update it if you have a clear idea of the change.
-
 # AI Coding Assistant Guidelines
 
 Make sure to use modern Angular style (version 19+):
@@ -17,3 +14,4 @@ issue
  6. Use standalone components
  7. Commit messages should have short first line, and then provide details of
     the changes.
+ 8. When something doesn't work, consider updating the [ai.md](ai.md) file to improve the guidelines.

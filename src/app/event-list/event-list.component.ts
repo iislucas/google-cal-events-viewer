@@ -23,7 +23,6 @@ export class EventListComponent implements OnInit {
   events = signal<CalendarEvent[]>([]);
   errorMessage = signal<string | null>(null); // To display error messages
   inputCalendarId: string = '';
-  inputApiKey: string = '';
   showInputFields = signal(false);
 
   private googleCalendarService = inject(GoogleCalendarService);
@@ -33,51 +32,45 @@ export class EventListComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const calendarId = params.get('calendarId');
-      const apiKey = params.get('apiKey');
-
-      if (calendarId && apiKey) {
-        this.fetchEvents(calendarId, apiKey);
+      if (calendarId) {
+        this.fetchEvents(calendarId);
         this.showInputFields.set(false);
       } else {
         this.showInputFields.set(true);
-        this.errorMessage.set(
-          'Please provide Calendar ID and API Key to fetch events.'
-        );
+        this.errorMessage.set('Please provide Calendar ID to fetch events.');
       }
     });
   }
 
-  async fetchEvents(calendarId: string, apiKey: string): Promise<void> {
+  async fetchEvents(calendarId: string): Promise<void> {
     this.errorMessage.set(null); // Clear any previous error messages
     try {
       const events = await this.googleCalendarService.getPublicCalendarEvents(
-        calendarId,
-        apiKey
+        calendarId
       );
       this.events.set(events);
       console.log('Fetched events:', this.events());
     } catch (err) {
       console.error('Error fetching calendar events:', err);
       this.errorMessage.set(
-        'Error fetching calendar events. Please check the console for more details or verify your Calendar ID and API Key.'
+        'Error fetching calendar events. Please check the console for more details or verify your Calendar ID.'
       );
     }
   }
 
   submitParameters(): void {
-    if (this.inputCalendarId && this.inputApiKey) {
+    if (this.inputCalendarId) {
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {
           calendarId: this.inputCalendarId,
-          apiKey: this.inputApiKey,
         },
         queryParamsHandling: 'merge', // Merge with existing query params
       });
       // The subscription in ngOnInit will handle fetching events after navigation
       this.showInputFields.set(false);
     } else {
-      this.errorMessage.set('Both Calendar ID and API Key are required.');
+      this.errorMessage.set('Calendar ID is required.');
     }
   }
 }

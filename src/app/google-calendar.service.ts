@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { lastValueFrom } from 'rxjs';
 import { CalendarEvent } from './event.model'; // Import the interface
+import { getFunctions, HttpsCallable, httpsCallable } from 'firebase/functions';
+import { initializeApp } from 'firebase/app';
+import { getAnalytics } from 'firebase/analytics';
+import { environment } from '../environments/environment';
 
 // Define interfaces for the Google Calendar API response
 interface GoogleCalendarEventItem {
@@ -24,28 +26,26 @@ interface GoogleCalendarResponse {
   providedIn: 'root',
 })
 export class GoogleCalendarService {
-  private readonly BASE_URL =
-    'https://www.googleapis.com/calendar/v3/calendars';
+  getCalendarEvents: HttpsCallable<
+    { calendarId: string },
+    GoogleCalendarResponse
+  >;
 
-  constructor(private http: HttpClient) {}
+  constructor() {
+    // Initialize Firebase
+    const app = initializeApp(environment.firebase);
+    const analytics = getAnalytics(app);
+    const functions = getFunctions();
+    this.getCalendarEvents = httpsCallable(functions, 'getCalendarEvents');
+  }
 
-  async getPublicCalendarEvents(
-    calendarId: string,
-    apiKey: string
-  ): Promise<CalendarEvent[]> {
-    // Using Google Calendar API v3 endpoint
-    // 'singleEvents=true' expands recurring events into individual instances.
-    // 'orderBy=startTime' sorts events by their start time.
-    // 'timeMin' can be used to filter future events, setting it to now.
-    const now = new Date().toISOString();
-    const url = `${this.BASE_URL}/${calendarId}/events?key=${apiKey}&singleEvents=true&orderBy=startTime&timeMin=${now}&maxResults=100`;
-
-    const response = await lastValueFrom(
-      this.http.get<GoogleCalendarResponse>(url)
-    );
-
-    // The structure for the v3 API is typically under response.items
-    if (response && response.items) {
+  async getPublicCalendarEvents(calendarId: string): Promise<CalendarEvent[]> {
+    // TODO: update to using this way of calling the calendar API, as specified in /functions/src/index.ts
+    return this.getCalendarEvents({ calendarId }).then((result) => {
+      const response = result.data as GoogleCalendarResponse | undefined;
+      if (!response || !response.items) {
+        return [];
+      }
       return response.items.map((item: GoogleCalendarEventItem) => {
         // console.log(item);
         return {
@@ -62,7 +62,6 @@ export class GoogleCalendarService {
           description: item.description || 'No description',
         } as CalendarEvent;
       });
-    }
-    return [];
+    });
   }
 }
