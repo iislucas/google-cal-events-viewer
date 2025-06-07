@@ -2,7 +2,7 @@
 <div class="error-message">
   <p>{{ errorMessage() }}</p>
 </div>
-} @if (showInputFields) {
+} @if (showInputFields()) {
 <div>
   <div>
     <label for="calendarId">Calendar ID:</label>
@@ -18,11 +18,11 @@
   </div>
   <button (click)="submitParameters()">Fetch Events</button>
 </div>
-} @if (events().length === 0 && !errorMessage() && !showInputFields) {
+} @if (events().length === 0 && !errorMessage() && !showInputFields()) {
 <div>
   <p>No events found</p>
 </div>
-} @if (events().length > 0 && !showInputFields) {
+} @if (events().length > 0 && !showInputFields()) {
 <div>
   <ul>
     @for (event of events(); track event) {

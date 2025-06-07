@@ -1,4 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { ActivatedRoute, Router } from '@angular/router'; // Import ActivatedRoute and Router
@@ -11,19 +17,18 @@ import { CalendarEvent } from '../event.model'; // Import the interface
   imports: [CommonModule, FormsModule], // Add FormsModule here
   templateUrl: './event-list.component.html',
   styleUrl: './event-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EventListComponent implements OnInit {
   events = signal<CalendarEvent[]>([]);
   errorMessage = signal<string | null>(null); // To display error messages
   inputCalendarId: string = '';
   inputApiKey: string = '';
-  showInputFields: boolean = false;
+  showInputFields = signal(false);
 
-  constructor(
-    private googleCalendarService: GoogleCalendarService,
-    private route: ActivatedRoute, // Inject ActivatedRoute
-    private router: Router // Inject Router
-  ) {}
+  private googleCalendarService = inject(GoogleCalendarService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
@@ -32,9 +37,9 @@ export class EventListComponent implements OnInit {
 
       if (calendarId && apiKey) {
         this.fetchEvents(calendarId, apiKey);
-        this.showInputFields = false;
+        this.showInputFields.set(false);
       } else {
-        this.showInputFields = true;
+        this.showInputFields.set(true);
         this.errorMessage.set(
           'Please provide Calendar ID and API Key to fetch events.'
         );
@@ -70,7 +75,7 @@ export class EventListComponent implements OnInit {
         queryParamsHandling: 'merge', // Merge with existing query params
       });
       // The subscription in ngOnInit will handle fetching events after navigation
-      this.showInputFields = false;
+      this.showInputFields.set(false);
     } else {
       this.errorMessage.set('Both Calendar ID and API Key are required.');
     }
