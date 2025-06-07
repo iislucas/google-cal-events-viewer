@@ -1,8 +1,9 @@
-<div *ngIf="errorMessage" class="error-message">
-  <p>{{ errorMessage }}</p>
+@if (errorMessage()) {
+<div class="error-message">
+  <p>{{ errorMessage() }}</p>
 </div>
-
-<div *ngIf="showInputFields">
+} @if (showInputFields) {
+<div>
   <div>
     <label for="calendarId">Calendar ID:</label>
     <input
@@ -17,14 +18,15 @@
   </div>
   <button (click)="submitParameters()">Fetch Events</button>
 </div>
-
-<div *ngIf="events.length === 0 && !errorMessage && !showInputFields">
+} @if (events().length === 0 && !errorMessage() && !showInputFields) {
+<div>
   <p>No events found</p>
 </div>
-
-<div *ngIf="events.length > 0 && !showInputFields">
+} @if (events().length > 0 && !showInputFields) {
+<div>
   <ul>
-    <li *ngFor="let event of events">
+    @for (event of events(); track event) {
+    <li>
       <h3>{{ event.title }}</h3>
       <p>
         @if(event.start === event.end) {
@@ -38,5 +40,7 @@
         <span [innerHTML]="event.description"></span>
       </p>
     </li>
+    }
   </ul>
 </div>
+}

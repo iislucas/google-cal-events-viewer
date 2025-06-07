@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule, NgFor } from '@angular/common';
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { ActivatedRoute, Router } from '@angular/router'; // Import ActivatedRoute and Router
 import { GoogleCalendarService } from '../google-calendar.service';
@@ -8,13 +8,13 @@ import { CalendarEvent } from '../event.model'; // Import the interface
 @Component({
   selector: 'app-event-list',
   standalone: true, // Ensure this is a standalone component
-  imports: [CommonModule, NgFor, FormsModule], // Add FormsModule here
+  imports: [CommonModule, FormsModule], // Add FormsModule here
   templateUrl: './event-list.component.html',
   styleUrl: './event-list.component.scss',
 })
 export class EventListComponent implements OnInit {
-  events: CalendarEvent[] = [];
-  errorMessage: string | null = null; // To display error messages
+  events = signal<CalendarEvent[]>([]);
+  errorMessage = signal<string | null>(null); // To display error messages
   inputCalendarId: string = '';
   inputApiKey: string = '';
   showInputFields: boolean = false;
@@ -35,27 +35,28 @@ export class EventListComponent implements OnInit {
         this.showInputFields = false;
       } else {
         this.showInputFields = true;
-        this.errorMessage =
-          'Please provide Calendar ID and API Key to fetch events.';
+        this.errorMessage.set(
+          'Please provide Calendar ID and API Key to fetch events.'
+        );
       }
     });
   }
 
-  fetchEvents(calendarId: string, apiKey: string): void {
-    this.errorMessage = null; // Clear any previous error messages
-    this.googleCalendarService
-      .getPublicCalendarEvents(calendarId, apiKey)
-      .subscribe({
-        next: (data) => {
-          this.events = data;
-          console.log('Fetched events:', this.events);
-        },
-        error: (err) => {
-          console.error('Error fetching calendar events:', err);
-          this.errorMessage =
-            'Error fetching calendar events. Please check the console for more details or verify your Calendar ID and API Key.';
-        },
-      });
+  async fetchEvents(calendarId: string, apiKey: string): Promise<void> {
+    this.errorMessage.set(null); // Clear any previous error messages
+    try {
+      const events = await this.googleCalendarService.getPublicCalendarEvents(
+        calendarId,
+        apiKey
+      );
+      this.events.set(events);
+      console.log('Fetched events:', this.events());
+    } catch (err) {
+      console.error('Error fetching calendar events:', err);
+      this.errorMessage.set(
+        'Error fetching calendar events. Please check the console for more details or verify your Calendar ID and API Key.'
+      );
+    }
   }
 
   submitParameters(): void {
@@ -71,7 +72,7 @@ export class EventListComponent implements OnInit {
       // The subscription in ngOnInit will handle fetching events after navigation
       this.showInputFields = false;
     } else {
-      this.errorMessage = 'Both Calendar ID and API Key are required.';
+      this.errorMessage.set('Both Calendar ID and API Key are required.');
     }
   }
 }
