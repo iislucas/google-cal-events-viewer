@@ -37,8 +37,11 @@ export class EventListComponent implements OnInit {
     this.route.queryParamMap.subscribe((params) => {
       const calendarId = params.get('calendarId');
       const q = params.get('q');
+      const searchField = params.get('searchField');
+
       if (calendarId) {
         this.searchTerm.set(q || '');
+        this.searchField.set(searchField || 'all');
         this.fetchEvents(calendarId, q);
         this.showInputFields.set(false);
       } else {
@@ -72,8 +75,10 @@ export class EventListComponent implements OnInit {
         relativeTo: this.route,
         queryParams: {
           calendarId: this.inputCalendarId,
+          q: null,
+          searchField: null,
         },
-        queryParamsHandling: 'merge', // Merge with existing query params
+        queryParamsHandling: 'merge', // Merge to clear search params
       });
       // The subscription in ngOnInit will handle fetching events after navigation
       this.showInputFields.set(false);
@@ -89,6 +94,7 @@ export class EventListComponent implements OnInit {
       relativeTo: this.route,
       queryParams: {
         q: this.searchTerm() || null,
+        searchField: this.searchField(),
       },
       queryParamsHandling: 'merge',
     });
