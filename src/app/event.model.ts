@@ -3,4 +3,7 @@ export interface CalendarEvent {
   start: string;
   end: string;
   description: string;
+  location?: string;
+  googleMapsUrl?: string;
+  htmlLink?: string;
 }

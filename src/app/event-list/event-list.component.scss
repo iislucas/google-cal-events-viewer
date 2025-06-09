@@ -41,3 +41,23 @@ strong {
 .right-space {
   margin-right: 1em;
 }
+
+.subheading {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em;
+  gap: 0.5em;
+}
+
+.description {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em;
+}
+
+.search-container {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em;
+  gap: 0.5em;
+}

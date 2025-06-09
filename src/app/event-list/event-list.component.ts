@@ -4,6 +4,7 @@ import {
   signal,
   inject,
   ChangeDetectionStrategy,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Import FormsModule
@@ -24,6 +25,9 @@ export class EventListComponent implements OnInit {
   errorMessage = signal<string | null>(null); // To display error messages
   inputCalendarId: string = '';
   showInputFields = signal(false);
+  searchTerm = signal('');
+  searchField = signal('all');
+  filteredEvents = signal<CalendarEvent[]>([]);
 
   private googleCalendarService = inject(GoogleCalendarService);
   private route = inject(ActivatedRoute);
@@ -32,8 +36,10 @@ export class EventListComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const calendarId = params.get('calendarId');
+      const q = params.get('q');
       if (calendarId) {
-        this.fetchEvents(calendarId);
+        this.searchTerm.set(q || '');
+        this.fetchEvents(calendarId, q);
         this.showInputFields.set(false);
       } else {
         this.showInputFields.set(true);
@@ -42,13 +48,15 @@ export class EventListComponent implements OnInit {
     });
   }
 
-  async fetchEvents(calendarId: string): Promise<void> {
+  async fetchEvents(calendarId: string, q: string | null): Promise<void> {
     this.errorMessage.set(null); // Clear any previous error messages
     try {
       const events = await this.googleCalendarService.getPublicCalendarEvents(
-        calendarId
+        calendarId,
+        q || undefined
       );
       this.events.set(events);
+      this.filterEvents(); // Filter events after fetching
       console.log('Fetched events:', this.events());
     } catch (err) {
       console.error('Error fetching calendar events:', err);
@@ -72,5 +80,48 @@ export class EventListComponent implements OnInit {
     } else {
       this.errorMessage.set('Calendar ID is required.');
     }
+  }
+
+  onSearch(): void {
+    // Update the URL to reflect the search term.
+    // The subscription in ngOnInit will handle fetching events.
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        q: this.searchTerm() || null,
+      },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  private filterEvents(): void {
+    const term = this.searchTerm().toLowerCase();
+    const field = this.searchField();
+    const events = this.events();
+
+    if (!term) {
+      this.filteredEvents.set(events);
+      return;
+    }
+
+    const filtered = events.filter((event) => {
+      if (field === 'all') {
+        return (
+          event.title.toLowerCase().includes(term) ||
+          event.description.toLowerCase().includes(term) ||
+          (event.location && event.location.toLowerCase().includes(term))
+        );
+      } else if (field === 'title') {
+        return event.title.toLowerCase().includes(term);
+      } else if (field === 'description') {
+        return event.description.toLowerCase().includes(term);
+      } else if (field === 'location') {
+        return event.location
+          ? event.location.toLowerCase().includes(term)
+          : false;
+      }
+      return false;
+    });
+    this.filteredEvents.set(filtered);
   }
 }

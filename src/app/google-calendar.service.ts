@@ -22,6 +22,8 @@ interface GoogleCalendarEventItem {
     date?: string;
   };
   description?: string;
+  location?: string;
+  htmlLink: string;
 }
 interface GoogleCalendarResponse {
   items?: GoogleCalendarEventItem[];
@@ -32,7 +34,7 @@ interface GoogleCalendarResponse {
 })
 export class GoogleCalendarService {
   getCalendarEvents: HttpsCallable<
-    { calendarId: string },
+    { calendarId: string; q?: string },
     GoogleCalendarResponse
   >;
 
@@ -42,14 +44,22 @@ export class GoogleCalendarService {
     const analytics = getAnalytics(app);
     const functions = getFunctions(app);
 
-    connectFunctionsEmulator(functions, '127.0.0.1', 5001); // Use the port from emulator output
+    // For debugging with a local emulator...
+    // connectFunctionsEmulator(functions, '127.0.0.1', 5001); // Use the port from emulator output
 
     this.getCalendarEvents = httpsCallable(functions, 'getCalendarEvents');
   }
 
-  async getPublicCalendarEvents(calendarId: string): Promise<CalendarEvent[]> {
-    console.log('getPublicCalendarEvents about to get events...', calendarId);
-    const result = await this.getCalendarEvents({ calendarId });
+  async getPublicCalendarEvents(
+    calendarId: string,
+    q?: string
+  ): Promise<CalendarEvent[]> {
+    console.log(
+      'getPublicCalendarEvents about to get events...',
+      calendarId,
+      q
+    );
+    const result = await this.getCalendarEvents({ calendarId, q });
     console.log('getPublicCalendarEvents result', result);
     const response = result.data as GoogleCalendarResponse | undefined;
 
@@ -61,11 +71,21 @@ export class GoogleCalendarService {
   }
 
   private mapGoogleCalendarEvent(item: GoogleCalendarEventItem): CalendarEvent {
+    const location = item.location;
+    const googleMapsUrl = location
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          location
+        )}`
+      : undefined;
+
     return {
       title: item.summary || 'No Title',
       start: item.start?.dateTime || item.start?.date || 'N/A',
       end: this.getEventEndDate(item.end),
       description: item.description || 'No description',
+      location,
+      googleMapsUrl,
+      htmlLink: item.htmlLink,
     };
   }
 

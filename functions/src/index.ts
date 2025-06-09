@@ -47,7 +47,7 @@ export const getCalendarEvents = onCall(
       );
     }
 
-    const { calendarId } = request.data;
+    const { calendarId, q } = request.data;
     if (typeof calendarId !== 'string' || !calendarId) {
       logger.warn('Missing or invalid calendarId parameter.', {
         data: request.data,
@@ -60,7 +60,11 @@ export const getCalendarEvents = onCall(
 
     const now = new Date().toISOString();
     const maxResults = 100;
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${calendarApiKey.value()}&singleEvents=true&orderBy=startTime&timeMin=${now}&maxResults=${maxResults}`;
+    let url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${calendarApiKey.value()}&singleEvents=true&orderBy=startTime&timeMin=${now}&maxResults=${maxResults}`;
+
+    if (typeof q === 'string' && q) {
+      url += `&q=${encodeURIComponent(q)}`;
+    }
 
     try {
       logger.info('Calling Google Calendar API.', { url });
