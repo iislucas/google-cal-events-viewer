@@ -102,6 +102,7 @@ async function setApiKeySecret(
     console.log('Verification successful. The secret is set correctly.');
     console.log(`Payload: ${responsePayload}`);
   } else {
+    console.log(`Payload: ${responsePayload}`);
     throw new Error('Verification failed. The secret was not set correctly.');
   }
 }

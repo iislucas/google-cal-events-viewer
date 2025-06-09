@@ -69,6 +69,14 @@ gcloud init
 gcloud auth application-default login
 ```
 
+### Setup
+
+
+Set the calendar API key by running the command
+```
+firebase functions:secrets:set GOOGLE_CALENDAR_API_KEY
+```
+
 ### Deploy
 
 ```

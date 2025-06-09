@@ -7,13 +7,11 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import { onRequest } from 'firebase-functions/v2/https';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
-// import * as functions from 'firebase-functions';
 import axios from 'axios';
 import { defineSecret } from 'firebase-functions/params';
 
-// Define some parameters
 const calendarApiKey = defineSecret('GOOGLE_CALENDAR_API_KEY');
 
 // Start writing functions
@@ -24,31 +22,68 @@ if (process.env.GCLOUD_PROJECT) {
   allowedOrigins.push(`https://${process.env.GCLOUD_PROJECT}.web.app`);
 }
 
-export const getCalendarEvents = onRequest(
-  { cors: allowedOrigins },
-  async (request, response) => {
-    logger.info('getCalendarEvents called', { structuredData: true });
-
-    const calendarId = request.query.calendarId;
-    if (!calendarId) {
-      response.status(400).send('Missing calendarId query parameter');
-      return;
-    }
+/**
+ * Fetches events from a public Google Calendar.
+ * This is a callable function that can be invoked from a client app.
+ *
+ * @param {{calendarId: string}} data - The data passed to the function.
+ * @param {string} data.calendarId - The ID of the Google Calendar to fetch events from.
+ * @returns {Promise<any>} A promise that resolves with the calendar events from the Google API.
+ * @throws {HttpsError} Throws an error if:
+ *  - The API key is not configured ('failed-precondition').
+ *  - The calendarId is missing or invalid ('invalid-argument').
+ *  - There's an error fetching data from the Google Calendar API ('internal' or 'unknown').
+ */
+export const getCalendarEvents = onCall(
+  { secrets: [calendarApiKey], cors: allowedOrigins },
+  async (request) => {
+    logger.info('getCalendarEvents called with data:', request.data);
 
     if (!calendarApiKey.value()) {
-      response.status(500).send('API key not configured');
-      return;
+      logger.error('Google Calendar API key is not configured.');
+      throw new HttpsError(
+        'failed-precondition',
+        'The function is not configured correctly. Please contact the administrator.'
+      );
+    }
+
+    const { calendarId } = request.data;
+    if (typeof calendarId !== 'string' || !calendarId) {
+      logger.warn('Missing or invalid calendarId parameter.', {
+        data: request.data,
+      });
+      throw new HttpsError(
+        'invalid-argument',
+        'The function must be called with a "calendarId" argument.'
+      );
     }
 
     const now = new Date().toISOString();
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${calendarApiKey.value()}&singleEvents=true&orderBy=startTime&timeMin=${now}&maxResults=100`;
+    const maxResults = 100;
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${calendarApiKey.value()}&singleEvents=true&orderBy=startTime&timeMin=${now}&maxResults=${maxResults}`;
 
     try {
+      logger.info('Calling Google Calendar API.', { url });
       const googleResponse = await axios.get(url);
-      response.send(googleResponse.data);
+      logger.info('Successfully fetched calendar events.');
+      return googleResponse.data;
     } catch (error) {
-      logger.error('Error fetching calendar events', error);
-      response.status(500).send('Error fetching calendar events');
+      let errorMessage = 'An unexpected error occurred.';
+      let errorCode: any = 'unknown';
+
+      if (axios.isAxiosError(error)) {
+        logger.error('Axios error fetching calendar events from Google:', {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data,
+        });
+        errorMessage = 'Failed to fetch calendar events from Google.';
+        errorCode = 'internal';
+      } else {
+        logger.error('Unknown error fetching calendar events:', error);
+      }
+
+      throw new HttpsError(errorCode, errorMessage);
     }
   }
 );
