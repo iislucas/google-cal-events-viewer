@@ -1,55 +1,47 @@
-<li>
-  <h3>{{ event().title }}</h3>
-  <div class="subheading">
-    <div>
-      @if(event().start === event().end) {
-      {{ event().start | date : "longDate" }}
-      } @else {
-      <span>{{ event().start | date : "longDate" }}</span> -
-      <span>{{ event().end | date : "longDate" }}</span>
-      }
-    </div>
-    <div>
-      @if(event().location) { @if(event().googleMapsUrl) {
-      <a
-        [href]="event().googleMapsUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        >{{ event().location }}</a
-      >
-      } @else {
-      <span>{{ event().location }}</span>
-      } }
-    </div>
-    @if(event().htmlLink) {
-    <div>
-      <a
-        [href]="event().htmlLink"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="View on Google Calendar"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+<mat-card appearance="outlined">
+  <mat-card-header (click)="toggleExpansion()">
+    <mat-card-title>{{ event().title }}</mat-card-title>
+    <mat-card-subtitle>
+      <div class="subtitle-group">
+        @if(event().start === event().end) {
+        <span>{{ event().start | date : "longDate" }}</span>
+        } @else {
+        <span
+          >{{ event().start | date : "longDate" }} -
+          {{ event().end | date : "longDate" }}</span
         >
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
-      </a>
+        } @if(event().location) {
+        <span>{{ event().location }}</span>
+        } @if(event().googleMapsUrl) {
+        <a
+          [href]="event().googleMapsUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="View on Google Maps"
+        >
+          <mat-icon>map</mat-icon>
+        </a>
+        } @if(event().htmlLink) {
+        <a
+          [href]="event().htmlLink"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="View on Google Calendar"
+        >
+          <mat-icon>event</mat-icon>
+        </a>
+        }
+      </div>
+    </mat-card-subtitle>
+    <button mat-icon-button>
+      <mat-icon>{{ isExpanded() ? "expand_less" : "expand_more" }}</mat-icon>
+    </button>
+  </mat-card-header>
+  @if (isExpanded()) {
+  <mat-card-content>
+    <div class="description">
+      <span [innerHTML]="event().description"></span>
     </div>
-    }
-  </div>
-  <div class="description">
-    <span [innerHTML]="event().description"></span>
-  </div>
-</li>
+  </mat-card-content>
+  }
+</mat-card>

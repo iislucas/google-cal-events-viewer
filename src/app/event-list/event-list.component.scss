@@ -1,22 +1,23 @@
 :host {
   display: block;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-}
-
-h2 {
-  color: #333;
-  margin-bottom: 20px;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
+  margin: 1em;
 }
 
 .search-container {
   display: flex;
   flex-direction: row;
-  padding: 0.5em;
-  gap: 0.5em;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.search-button-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }

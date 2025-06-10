@@ -8,11 +8,14 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GoogleCalendarService } from '../google-calendar.service';
 import { CalendarEvent } from '../event.model';
 import MiniSearch from 'minisearch';
 import { EventItemComponent } from '../event-item/event-item.component';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
 /**
  * A type representing a calendar event that can be indexed by MiniSearch.
@@ -23,7 +26,19 @@ type SearchableCalendarEvent = CalendarEvent & { id: number };
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, EventItemComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    EventItemComponent,
+    MatInputModule,
+    MatButtonModule,
+  ],
+  providers: [
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { subscriptSizing: 'dynamic' },
+    },
+  ],
   templateUrl: './event-list.component.html',
   styleUrl: './event-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

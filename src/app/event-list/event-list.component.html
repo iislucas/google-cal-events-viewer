@@ -2,31 +2,40 @@
 <div class="error-message">
   <p>{{ errorMessage() }}</p>
 </div>
-}
-
-<form (ngSubmit)="onSearch()" class="search-container">
-  <input
-    type="text"
-    [ngModel]="searchInput()"
-    (ngModelChange)="searchInput.set($event)"
-    name="searchTerm"
-    placeholder="Search events..."
-  />
-  <button type="submit">Search</button>
-</form>
-
-@if (showInputFields()) {
-<div>
-  <div>
-    <label for="calendarId">Calendar ID:</label>
+} @if (showInputFields()) {
+<div class="search-container">
+  <mat-form-field>
+    <mat-label>Calendar ID</mat-label>
     <input
+      matInput
       id="calendarId"
       [(ngModel)]="inputCalendarId"
       placeholder="Enter Calendar ID"
     />
-  </div>
-  <button (click)="submitParameters()">Fetch Events</button>
+  </mat-form-field>
+  <button mat-raised-button (click)="submitParameters()">Fetch Events</button>
 </div>
+} @else {
+<form (ngSubmit)="onSearch()" class="search-container">
+  <mat-form-field>
+    <mat-label>Search events</mat-label>
+    <input
+      matInput
+      type="text"
+      [ngModel]="searchInput()"
+      (ngModelChange)="searchInput.set($event)"
+      name="searchTerm"
+    />
+  </mat-form-field>
+  <button
+    mat-raised-button
+    color="primary"
+    type="submit"
+    class="mat-form-field-wrapper"
+  >
+    Search
+  </button>
+</form>
 } @if (searchResults().matched.length === 0 && searchResults().unmatched.length
 === 0 && !errorMessage() && !showInputFields()) {
 <div>
@@ -36,22 +45,26 @@
 <div>
   <!-- Matched Events -->
   @if (searchResults().matched.length > 0) {
-  <ul>
+  <div>
     @for (event of searchResults().matched; track event.id) {
-    <app-event-item [event]="event" />
+    <div>
+      <app-event-item [event]="event" />
+    </div>
     }
-  </ul>
+  </div>
   }
 
   <!-- Unmatched Events -->
   @if (searchResults().unmatched.length > 0) {
   <hr />
   <h2>Other Events</h2>
-  <ul>
+  <div>
     @for (event of searchResults().unmatched; track event.id) {
-    <app-event-item [event]="event" />
+    <div>
+      <app-event-item [event]="event" />
+    </div>
     }
-  </ul>
+  </div>
   }
 </div>
 }
