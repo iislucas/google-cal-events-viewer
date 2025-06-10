@@ -58,33 +58,44 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
-## Google Cloud & Firebase
+## Setup
+
+### Google Cloud & Firebase
 
 This project uses Google Cloud and Firebase.
 
-```
+```sh
 gcloud config set project $PROJECT_ID
 firebase auth
 gcloud init
 gcloud auth application-default login
 ```
 
-### Setup
+### API Key Secrets
 
+See [Secret Manager](https://console.developers.google.com/apis/api/secretmanager.googleapis.com/overview).
 
 Set the calendar API key by running the command
-```
+```sh
 firebase functions:secrets:set GOOGLE_CALENDAR_API_KEY
+# You will then be asked to enter the API key secret, do that.
+
+# You can preview the secret...
+gcloud secrets versions access 5 --secret=GOOGLE_CALENDAR_API_KEY
 ```
 
-### Deploy
+### Client side envionment
+
+Copy & fill out `src/environments/environment.ts`, saving it as
+`src/environments/environment.prod.ts` and `src/environments/environment.dev.ts`
+
+### Server side envionment
+
+Copy & fill out `functions/src/environments/environment.template.ts`, saving it as
+`functions/src/environments/environment.ts`.
+
+## Deploy
 
 ```
-firebase deploy
+npm run deploy
 ```
-
-### Cloud APIs
-
-Secret Manager:
-* https://console.developers.google.com/apis/api/secretmanager.googleapis.com/overview
-* 

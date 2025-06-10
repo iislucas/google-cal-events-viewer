@@ -7,60 +7,115 @@ import {
   computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Import FormsModule
-import { ActivatedRoute, Router } from '@angular/router'; // Import ActivatedRoute and Router
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GoogleCalendarService } from '../google-calendar.service';
-import { CalendarEvent } from '../event.model'; // Import the interface
+import { CalendarEvent } from '../event.model';
+import MiniSearch from 'minisearch';
+import { EventItemComponent } from '../event-item/event-item.component';
+
+/**
+ * A type representing a calendar event that can be indexed by MiniSearch.
+ * It includes a numeric `id` field required by the library.
+ */
+type SearchableCalendarEvent = CalendarEvent & { id: number };
 
 @Component({
   selector: 'app-event-list',
-  standalone: true, // Ensure this is a standalone component
-  imports: [CommonModule, FormsModule], // Add FormsModule here
+  standalone: true,
+  imports: [CommonModule, FormsModule, EventItemComponent],
   templateUrl: './event-list.component.html',
   styleUrl: './event-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EventListComponent implements OnInit {
-  events = signal<CalendarEvent[]>([]);
-  errorMessage = signal<string | null>(null); // To display error messages
-  inputCalendarId: string = '';
+  // --- Component State Signals ---
+  private allEvents = signal<SearchableCalendarEvent[]>([]);
+  errorMessage = signal<string | null>(null);
   showInputFields = signal(false);
-  searchTerm = signal('');
-  searchField = signal('all');
-  filteredEvents = signal<CalendarEvent[]>([]);
+  inputCalendarId: string = '';
 
+  // This signal is bound to the search input field and updates on every keystroke.
+  searchInput = signal('');
+  // This signal holds the value of the submitted search term.
+  private searchTerm = signal('');
+
+  // --- Injected Dependencies ---
   private googleCalendarService = inject(GoogleCalendarService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
+  // --- Full-text Search Implementation ---
+  private miniSearch: MiniSearch<SearchableCalendarEvent>;
+
+  /**
+   * A computed signal that reactively filters events based on the submitted search term.
+   * It separates the events into two lists: those that match the search query
+   * and those that do not.
+   */
+  readonly searchResults = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    const events = this.allEvents();
+
+    if (!term) {
+      return { matched: events, unmatched: [] };
+    }
+
+    const results = this.miniSearch.search(term, { prefix: true, fuzzy: 0.2 });
+    const matchedIds = new Set(results.map((r) => r.id));
+    const matched = results as unknown as SearchableCalendarEvent[];
+    const unmatched = events.filter((event) => !matchedIds.has(event.id));
+
+    return { matched, unmatched };
+  });
+
+  constructor() {
+    this.miniSearch = new MiniSearch<SearchableCalendarEvent>({
+      fields: ['title', 'description', 'location'],
+      storeFields: [
+        'id',
+        'title',
+        'start',
+        'end',
+        'description',
+        'location',
+        'googleMapsUrl',
+        'htmlLink',
+      ],
+      idField: 'id',
+    });
+  }
+
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const calendarId = params.get('calendarId');
-      const q = params.get('q');
-      const searchField = params.get('searchField');
-
       if (calendarId) {
-        this.searchTerm.set(q || '');
-        this.searchField.set(searchField || 'all');
-        this.fetchEvents(calendarId, q);
+        const q = params.get('q');
+        this.searchInput.set(q || '');
+        this.searchTerm.set(q || ''); // Set initial search term from URL
+        this.fetchEvents(calendarId);
         this.showInputFields.set(false);
       } else {
         this.showInputFields.set(true);
-        this.errorMessage.set('Please provide Calendar ID to fetch events.');
+        this.errorMessage.set('Please provide a Calendar ID to fetch events.');
       }
     });
   }
 
-  async fetchEvents(calendarId: string, q: string | null): Promise<void> {
-    this.errorMessage.set(null); // Clear any previous error messages
+  async fetchEvents(calendarId: string): Promise<void> {
+    this.errorMessage.set(null);
     try {
       const events = await this.googleCalendarService.getPublicCalendarEvents(
-        calendarId,
-        q || undefined
+        calendarId
       );
-      this.events.set(events);
-      this.filterEvents(); // Filter events after fetching
-      console.log('Fetched events:', this.events());
+      const eventsWithId = events.map((event, index) => ({
+        ...event,
+        id: index,
+      }));
+      this.allEvents.set(eventsWithId);
+
+      this.miniSearch.removeAll();
+      this.miniSearch.addAll(eventsWithId);
     } catch (err) {
       console.error('Error fetching calendar events:', err);
       this.errorMessage.set(
@@ -76,58 +131,25 @@ export class EventListComponent implements OnInit {
         queryParams: {
           calendarId: this.inputCalendarId,
           q: null,
-          searchField: null,
         },
-        queryParamsHandling: 'merge', // Merge to clear search params
+        queryParamsHandling: 'merge',
       });
-      // The subscription in ngOnInit will handle fetching events after navigation
-      this.showInputFields.set(false);
     } else {
       this.errorMessage.set('Calendar ID is required.');
     }
   }
 
+  /**
+   * This method is called when the search form is submitted.
+   * It updates the `searchTerm` signal, which triggers the `searchResults` computed signal.
+   * It also updates the URL with the new search query.
+   */
   onSearch(): void {
-    // Update the URL to reflect the search term.
-    // The subscription in ngOnInit will handle fetching events.
+    this.searchTerm.set(this.searchInput());
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: {
-        q: this.searchTerm() || null,
-        searchField: this.searchField(),
-      },
+      queryParams: { q: this.searchInput() || null },
       queryParamsHandling: 'merge',
     });
-  }
-
-  private filterEvents(): void {
-    const term = this.searchTerm().toLowerCase();
-    const field = this.searchField();
-    const events = this.events();
-
-    if (!term) {
-      this.filteredEvents.set(events);
-      return;
-    }
-
-    const filtered = events.filter((event) => {
-      if (field === 'all') {
-        return (
-          event.title.toLowerCase().includes(term) ||
-          event.description.toLowerCase().includes(term) ||
-          (event.location && event.location.toLowerCase().includes(term))
-        );
-      } else if (field === 'title') {
-        return event.title.toLowerCase().includes(term);
-      } else if (field === 'description') {
-        return event.description.toLowerCase().includes(term);
-      } else if (field === 'location') {
-        return event.location
-          ? event.location.toLowerCase().includes(term)
-          : false;
-      }
-      return false;
-    });
-    this.filteredEvents.set(filtered);
   }
 }

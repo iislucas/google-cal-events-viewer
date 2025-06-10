@@ -15,3 +15,4 @@ issue
  7. Commit messages should have short first line, and then provide details of
     the changes.
  8. When something doesn't work, consider updating the [ai.md](ai.md) file to improve the guidelines.
+ 9. Use `npx ng` to run Angular CLI commands.

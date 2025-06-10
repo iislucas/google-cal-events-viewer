@@ -11,13 +11,10 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import * as logger from 'firebase-functions/logger';
 import axios from 'axios';
 import { defineSecret } from 'firebase-functions/params';
-
+import { environment } from './environment/environment';
 const calendarApiKey = defineSecret('GOOGLE_CALENDAR_API_KEY');
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
-
-const allowedOrigins = ['http://localhost:4200'];
+const allowedOrigins = environment.domains;
 if (process.env.GCLOUD_PROJECT) {
   allowedOrigins.push(`https://${process.env.GCLOUD_PROJECT}.web.app`);
 }

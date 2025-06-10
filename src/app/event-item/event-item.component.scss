@@ -1,0 +1,45 @@
+:host {
+  display: block;
+  font-family: Arial, sans-serif;
+}
+
+li {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+  color: #0056b3;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+p {
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+strong {
+  color: #555;
+}
+
+.right-space {
+  margin-right: 1em;
+}
+
+.subheading {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em;
+  gap: 0.5em;
+}
+
+.description {
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em;
+}
