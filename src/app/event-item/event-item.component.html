@@ -21,9 +21,9 @@
         >
           <mat-icon>map</mat-icon>
         </a>
-        } @if(event().htmlLink) {
+        } @if(event().googleCalEventLink) {
         <a
-          [href]="event().htmlLink"
+          [href]="event().googleCalEventLink"
           target="_blank"
           rel="noopener noreferrer"
           title="View on Google Calendar"

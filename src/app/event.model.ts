@@ -5,5 +5,5 @@ export interface CalendarEvent {
   description: string;
   location?: string;
   googleMapsUrl?: string;
-  htmlLink?: string;
+  googleCalEventLink?: string;
 }

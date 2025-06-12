@@ -77,7 +77,6 @@ export class GoogleCalendarService {
           location
         )}`
       : undefined;
-
     return {
       title: item.summary || 'No Title',
       start: item.start?.dateTime || item.start?.date || 'N/A',
@@ -85,7 +84,7 @@ export class GoogleCalendarService {
       description: item.description || 'No description',
       location,
       googleMapsUrl,
-      htmlLink: item.htmlLink,
+      googleCalEventLink: item.htmlLink,
     };
   }
 

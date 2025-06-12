@@ -2,15 +2,26 @@
 <div class="error-message">
   <p>{{ errorMessage() }}</p>
 </div>
-} @if (showInputFields()) {
+} @if (needCalendarId()) {
 <div class="search-container">
   <mat-form-field>
     <mat-label>Calendar ID</mat-label>
     <input
       matInput
+      matInput
       id="calendarId"
-      [(ngModel)]="inputCalendarId"
+      [ngModel]="inputCalendarId()"
+      (ngModelChange)="inputCalendarId.set($event)"
       placeholder="Enter Calendar ID"
+    />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Server-side Search</mat-label>
+    <input
+      matInput
+      id="serverSearch"
+      [(ngModel)]="inputServerSideSearch"
+      placeholder="Enter search term for server"
     />
   </mat-form-field>
   <button mat-raised-button (click)="submitParameters()">Fetch Events</button>
@@ -23,7 +34,7 @@
       matInput
       type="text"
       [ngModel]="searchInput()"
-      (ngModelChange)="searchInput.set($event)"
+      (ngModelChange)="onSearchInputChange($event)"
       name="searchTerm"
     />
   </mat-form-field>
@@ -31,13 +42,31 @@
     mat-raised-button
     color="primary"
     type="submit"
+    [disabled]="isSearchDisabled()"
     class="mat-form-field-wrapper"
   >
     Search
   </button>
+  @if (inputCalendarId()) {
+  <a
+    mat-icon-button
+    href="https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=Europe%2FParis&mode=AGENDA&src={{
+      inputCalendarId()
+    }}&color=%23f6bf26"
+    target="_blank"
+    aria-label="Open in Google Calendar"
+  >
+    <mat-icon>calendar_today</mat-icon>
+  </a>
+  }
 </form>
-} @if (searchResults().matched.length === 0 && searchResults().unmatched.length
-=== 0 && !errorMessage() && !showInputFields()) {
+} @if (isLoading()) {
+<div class="spinner-container">
+  <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+</div>
+} @else if (searchResults().matched.length === 0 &&
+searchResults().unmatched.length === 0 && !errorMessage() && !needCalendarId())
+{
 <div>
   <p>No events found</p>
 </div>
