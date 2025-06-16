@@ -77,22 +77,104 @@ export class EventListComponent implements OnInit {
    * and those that do not.
    */
   readonly searchResults = computed(() => {
-    const term = this.searchInput().trim().toLowerCase();
+    const term = this.searchInput().trim();
     const events = this.allEvents();
 
     if (!term) {
       return { matched: events, unmatched: [] };
     }
 
-    const results = this.miniSearch.search(term, {
+    const { quoted, nonQuoted } = this.parseSearchTerm(term);
+    // console.log('quoted', quoted);
+    // console.log('nonQuoted', nonQuoted);
+
+    // If there's nothing to search for, return all events.
+    if (!nonQuoted && quoted.length === 0) {
+      return { matched: events, unmatched: [] };
+    }
+
+    const results = this.miniSearch.search(nonQuoted, {
       prefix: true,
       fuzzy: 0.01,
+      filter: (result) => {
+        // If there are no quoted terms, all results from MiniSearch are valid.
+        if (quoted.length === 0) {
+          return true;
+        }
+
+        // For a result to be valid, it must contain all of the quoted terms.
+        const title = result['title'].toLowerCase();
+        const location = result['location']?.toLowerCase() || '';
+        const start = result['start']?.toLowerCase() || '';
+        const end = result['end']?.toLowerCase() || '';
+        return quoted.every((q) => {
+          // console.log({ title, location, start, end });
+          // console.log('query:', q);
+          return (
+            start.toLowerCase().includes(q) ||
+            end.toLowerCase().includes(q) ||
+            title.toLowerCase().includes(q) ||
+            location.toLowerCase().includes(q)
+          );
+        });
+      },
     });
+
     const matchedIds = new Set(results.map((r) => r.id));
     const matched = events.filter((event) => matchedIds.has(event.id));
     const unmatched = events.filter((event) => !matchedIds.has(event.id));
     return { matched, unmatched };
   });
+
+  /**
+   * Parses a search term into quoted and non-quoted parts.
+   *
+   * This method splits a search string by quotes to separate exact-match phrases
+   * (quoted) from general search terms (non-quoted). This allows for more
+   * precise filtering of events.
+   *
+   * @param term The raw search string from the user input.
+   * @returns An object containing two properties:
+   * - `quoted`: An array of lowercased strings that were enclosed in double quotes.
+   * - `nonQuoted`: A single lowercased string comprising all parts of the
+   *   search term that were not inside quotes, joined together.
+   *
+   * @example
+   * // Returns { quoted: ['exact phrase'], nonQuoted: 'regular search' }
+   * parseSearchTerm('regular "exact phrase" search')
+   *
+   * @remarks
+   * This implementation handles unterminated quotes by treating the content
+   * after the last quote as part of the non-quoted search term. For example,
+   * `'word "another'` would be parsed as `{ quoted: [], nonQuoted: 'word another' }`.
+   */
+  private parseSearchTerm(term: string): {
+    quoted: string[];
+    nonQuoted: string;
+  } {
+    const parts = term.split('"');
+    const quoted: string[] = [];
+    const nonQuotedParts: string[] = [];
+
+    // If `parts.length` is even, it indicates an unterminated quote in the term.
+    const hasUnterminatedQuote = parts.length % 2 === 0;
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (!part) continue;
+
+      // An odd index corresponds to a part within quotes, unless it's the
+      // last part of a term with an unterminated quote.
+      if (i % 2 === 1 && !(hasUnterminatedQuote && i === parts.length - 1)) {
+        quoted.push(part.toLowerCase());
+      } else {
+        nonQuotedParts.push(part);
+      }
+    }
+
+    const nonQuoted = nonQuotedParts.join(' ').trim().toLowerCase();
+    return { quoted, nonQuoted };
+  }
 
   constructor() {
     this.miniSearch = new MiniSearch<SearchableCalendarEvent>({
