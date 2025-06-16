@@ -63,18 +63,6 @@ export class EventListComponent implements OnInit {
   // This signal holds the value of the submitted search term for server-side searching.
   private serverSideSearch = signal('');
 
-  /**
-   * A computed signal that determines if the search button should be disabled.
-   * The button is disabled if the input is empty or if the input value
-   * is the same as the last submitted search term.
-   */
-  readonly isSearchDisabled = computed(() => {
-    const currentInput = this.searchInput();
-    const lastSearch = this.clientSideSearch();
-    // Disable if input is empty or unchanged from the last search.
-    return currentInput === '' || currentInput === lastSearch;
-  });
-
   // --- Injected Dependencies ---
   private googleCalendarService = inject(GoogleCalendarService);
   private route = inject(ActivatedRoute);
@@ -89,7 +77,7 @@ export class EventListComponent implements OnInit {
    * and those that do not.
    */
   readonly searchResults = computed(() => {
-    const term = this.clientSideSearch().trim().toLowerCase();
+    const term = this.searchInput().trim().toLowerCase();
     const events = this.allEvents();
 
     if (!term) {
@@ -181,11 +169,12 @@ export class EventListComponent implements OnInit {
    */
   onSearchInputChange(value: string): void {
     this.searchInput.set(value);
-    // When the user clears the input, we immediately perform a search for an
-    // empty string, which effectively clears the filter and shows all events.
-    if (value === '') {
-      this.onSearch();
-    }
+    this.clientSideSearch.set(value);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { client_q: value || null },
+      queryParamsHandling: 'merge',
+    });
   }
 
   submitParameters(): void {
@@ -203,20 +192,5 @@ export class EventListComponent implements OnInit {
     } else {
       this.errorMessage.set('Calendar ID is required.');
     }
-  }
-
-  /**
-   * This method is called when the search form is submitted.
-   * It updates the `searchTerm` signal, which triggers the `searchResults` computed signal.
-   * It also updates the URL with the new search query.
-   */
-  onSearch(): void {
-    const searchTerm = this.searchInput();
-    this.clientSideSearch.set(searchTerm);
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { client_q: searchTerm || null },
-      queryParamsHandling: 'merge',
-    });
   }
 }

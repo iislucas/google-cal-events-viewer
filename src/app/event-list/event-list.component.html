@@ -27,7 +27,7 @@
   <button mat-raised-button (click)="submitParameters()">Fetch Events</button>
 </div>
 } @else {
-<form (ngSubmit)="onSearch()" class="search-container">
+<div class="search-container">
   <mat-form-field>
     <mat-label>Search events</mat-label>
     <input
@@ -38,15 +38,6 @@
       name="searchTerm"
     />
   </mat-form-field>
-  <button
-    mat-raised-button
-    color="primary"
-    type="submit"
-    [disabled]="isSearchDisabled()"
-    class="mat-form-field-wrapper"
-  >
-    Search
-  </button>
   @if (inputCalendarId()) {
   <a
     mat-icon-button
@@ -59,7 +50,7 @@
     <mat-icon>calendar_today</mat-icon>
   </a>
   }
-</form>
+</div>
 } @if (isLoading()) {
 <div class="spinner-container">
   <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
