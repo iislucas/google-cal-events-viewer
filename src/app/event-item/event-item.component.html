@@ -19,7 +19,7 @@
           rel="noopener noreferrer"
           title="View on Google Maps"
         >
-          <mat-icon svgIcon="map">map</mat-icon>
+          <mat-icon>map</mat-icon>
         </a>
         } @if(event().googleCalEventLink) {
         <a
@@ -28,13 +28,13 @@
           rel="noopener noreferrer"
           title="View on Google Calendar"
         >
-          <mat-icon svgIcon="event">event</mat-icon>
+          <mat-icon>event</mat-icon>
         </a>
         }
       </div>
     </mat-card-subtitle>
     <button mat-icon-button>
-      <mat-icon [svgIcon]="expandIconName()">{{ expandIconName() }}</mat-icon>
+      <mat-icon>{{ expandIconName() }}</mat-icon>
     </button>
   </mat-card-header>
   @if (expandIconName() === "expand_less") {

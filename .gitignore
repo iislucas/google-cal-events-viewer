@@ -44,6 +44,7 @@ Thumbs.db
 # Environment files
 src/environments/environment.dev.ts
 src/environments/environment.prod.ts
+src/environments/gcloud-cors-config.json
 
 # Firebase
 .firebase/

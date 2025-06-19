@@ -31,7 +31,7 @@ ng generate --help
 To build the project run:
 
 ```bash
-ng build
+npm run build:all
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
@@ -94,7 +94,23 @@ Copy & fill out `src/environments/environment.ts`, saving it as
 Copy & fill out `functions/src/environments/environment.template.ts`, saving it as
 `functions/src/environments/environment.ts`.
 
+### Cloud storage CORS settings
+
+If you want to deploy the standalone webcomponent to a cloud storage web-bucket,
+copy and edit the `src/environments/gcloud-cors-config.template.json` file to be
+`src/environments/gcloud-cors-config.json`, then deploy the changes to cloud
+with: 
+
+```
+BUCKET_NAME=...
+gsutil cors set src/environments/gcloud-cors-config.json gs://${BUCKET_NAME}
+gsutil cors get gs://${BUCKET_NAME}
+```
+
+
 ## Deploy
+
+### WebComponent to a Cloud Storage Bucket
 
 Make the standalone web-component:
 
@@ -102,13 +118,21 @@ Make the standalone web-component:
 npm build:wc
 ```
 
-Serve the standalone web-component for interactive testing:
+Copy file to your cloud bucket...
+
+```
+BUCKET_NAME_AND_PATH=...
+
+gcloud storage cp -R ./dist/google-cal-events-viewer/wc/* gs://${BUCKET_NAME_AND_PATH}
+```
+
+For testing, you can serve the standalone web-component for interactive testing:
 
 ```
 npm start:wc
 ```
 
-Deploy to firebase...
+### Deploy to FireBase
 
 ```
 npm run deploy
