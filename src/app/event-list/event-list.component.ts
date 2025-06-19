@@ -19,6 +19,29 @@ import MiniSearch from 'minisearch';
 import { EventItemComponent } from '../event-item/event-item.component';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
+function quotedFilter(result: CalendarEvent, quoted: string[]): boolean {
+  // If there are no quoted terms, all results from MiniSearch are valid.
+  if (quoted.length === 0) {
+    return true;
+  }
+
+  // For a result to be valid, it must contain all of the quoted terms.
+  const title = result.title.toLowerCase();
+  const location = result.location?.toLowerCase() || '';
+  const start = result.start?.toLowerCase() || '';
+  const end = result.end?.toLowerCase() || '';
+  return quoted.every((q) => {
+    // console.log({ title, location, start, end });
+    // console.log('query:', q);
+    return (
+      start.toLowerCase().includes(q) ||
+      end.toLowerCase().includes(q) ||
+      title.toLowerCase().includes(q) ||
+      location.toLowerCase().includes(q)
+    );
+  });
+}
+
 /**
  * A type representing a calendar event that can be indexed by MiniSearch.
  * It includes a numeric `id` field required by the library.
@@ -93,34 +116,25 @@ export class EventListComponent implements OnInit {
       return { matched: events, unmatched: [] };
     }
 
-    const results = this.miniSearch.search(nonQuoted, {
-      prefix: true,
-      fuzzy: 0.01,
-      filter: (result) => {
-        // If there are no quoted terms, all results from MiniSearch are valid.
-        if (quoted.length === 0) {
-          return true;
-        }
+    let matchedIds: Set<string>;
 
-        // For a result to be valid, it must contain all of the quoted terms.
-        const title = result['title'].toLowerCase();
-        const location = result['location']?.toLowerCase() || '';
-        const start = result['start']?.toLowerCase() || '';
-        const end = result['end']?.toLowerCase() || '';
-        return quoted.every((q) => {
-          // console.log({ title, location, start, end });
-          // console.log('query:', q);
-          return (
-            start.toLowerCase().includes(q) ||
-            end.toLowerCase().includes(q) ||
-            title.toLowerCase().includes(q) ||
-            location.toLowerCase().includes(q)
-          );
-        });
-      },
-    });
-
-    const matchedIds = new Set(results.map((r) => r.id));
+    // If there are only quoted strings, search them only.
+    if (nonQuoted.trim() === '') {
+      matchedIds = new Set(
+        events
+          .filter((result) => quotedFilter(result, quoted))
+          .map((event) => event.id)
+      );
+    } else {
+      // search non-quoted, and then filter by quoted.
+      const results = this.miniSearch.search(nonQuoted, {
+        prefix: true,
+        fuzzy: 0.01,
+        filter: (result) =>
+          quotedFilter(result as unknown as CalendarEvent, quoted),
+      });
+      matchedIds = new Set(results.map((r) => r.id));
+    }
     const matched = events.filter((event) => matchedIds.has(event.id));
     const unmatched = events.filter((event) => !matchedIds.has(event.id));
     return { matched, unmatched };
