@@ -1,1 +1,8 @@
-<router-outlet />
+<app-event-list
+  [calendarId]="calendarId()"
+  [clientSideSearchQuery]="clientQuery()"
+  [serverSideSearchQuery]="serverQuery()"
+  (calendarIdChange)="onCalendarIdChange($event)"
+  (clientSideSearchChange)="onClientSideSearchChange($event)"
+  (serverSideSearchChange)="onServerSideSearchChange($event)"
+/>

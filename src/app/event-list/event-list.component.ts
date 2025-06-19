@@ -1,10 +1,13 @@
 import {
   Component,
-  OnInit,
   signal,
   inject,
   ChangeDetectionStrategy,
   computed,
+  input,
+  Output,
+  EventEmitter,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +15,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute, Router } from '@angular/router';
 import { GoogleCalendarService } from '../google-calendar.service';
 import { CalendarEvent } from '../event.model';
 import MiniSearch from 'minisearch';
@@ -71,26 +73,34 @@ type SearchableCalendarEvent = CalendarEvent & { id: string };
   styleUrl: './event-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EventListComponent implements OnInit {
+export class EventListComponent {
   // --- Component State Signals ---
   private allEvents = signal<SearchableCalendarEvent[]>([]);
   errorMessage = signal<string | null>(null);
   isLoading = signal(false);
   needCalendarId = signal(true);
   inputCalendarId = signal('');
-  inputServerSideSearch: string = '';
 
   // This signal is bound to the search input field and updates on every keystroke.
   searchInput = signal('');
   // This signal holds the value of the submitted search term for client-side filtering.
   private clientSideSearch = signal('');
   // This signal holds the value of the submitted search term for server-side searching.
-  private serverSideSearch = signal('');
+  serverSideSearch = signal('');
+  private usedCalendarId = signal('');
 
   // --- Injected Dependencies ---
   private googleCalendarService = inject(GoogleCalendarService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+
+  // --- Component Inputs ---
+  calendarId = input<string>();
+  serverSideSearchQuery = input<string>();
+  clientSideSearchQuery = input<string>();
+
+  // --- Component Outputs ---
+  @Output() clientSideSearchChange = new EventEmitter<string>();
+  @Output() serverSideSearchChange = new EventEmitter<string>();
+  @Output() calendarIdChange = new EventEmitter<string>();
 
   // --- Full-text Search Implementation ---
   private miniSearch: MiniSearch<SearchableCalendarEvent>;
@@ -158,28 +168,30 @@ export class EventListComponent implements OnInit {
       ],
       idField: 'id',
     });
-  }
 
-  ngOnInit(): void {
-    this.route.queryParamMap.subscribe((params) => {
-      const calendarId = params.get('calendarId');
-      let refetch = false;
-      if (calendarId && calendarId !== this.inputCalendarId()) {
-        refetch = true;
-      }
-      if (calendarId) {
+    effect(() => {
+      const calendarId = this.calendarId();
+      if (calendarId && calendarId !== this.usedCalendarId()) {
+        this.usedCalendarId.set(calendarId);
         this.inputCalendarId.set(calendarId);
-        const serverQuery = params.get('q') || '';
-        const clientQuery = params.get('client_q') || '';
+        const serverQuery = this.serverSideSearchQuery() ?? '';
         this.serverSideSearch.set(serverQuery);
-        this.searchInput.set(clientQuery);
-        this.clientSideSearch.set(clientQuery);
-        if (refetch) {
-          this.fetchEvents(calendarId, serverQuery);
-        }
-      } else {
+        this.fetchEvents(calendarId, serverQuery);
+      } else if (!calendarId) {
+        this.allEvents.set([]); // Clear events if no ID
+        this.miniSearch.removeAll();
+        this.needCalendarId.set(true);
         this.errorMessage.set('Please provide a Calendar ID to fetch events.');
       }
+
+      const clientQuery = this.clientSideSearchQuery() ?? '';
+      this.clientSideSearch.set(clientQuery);
+      this.searchInput.set(clientQuery);
+    });
+
+    effect(() => {
+      const calId = this.usedCalendarId();
+      this.calendarIdChange.emit(calId);
     });
   }
 
@@ -269,25 +281,16 @@ export class EventListComponent implements OnInit {
   onSearchInputChange(value: string): void {
     this.searchInput.set(value);
     this.clientSideSearch.set(value);
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { client_q: value || null },
-      queryParamsHandling: 'merge',
-    });
+    this.clientSideSearchChange.emit(value);
   }
 
   submitParameters(): void {
-    if (this.inputCalendarId()) {
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: {
-          calendarId: this.inputCalendarId(),
-          q: this.inputServerSideSearch || null,
-        },
-        queryParamsHandling: 'merge',
-      });
-
-      this.fetchEvents(this.inputCalendarId(), this.serverSideSearch());
+    const calendarId = this.inputCalendarId();
+    if (calendarId) {
+      this.usedCalendarId.set(calendarId);
+      this.calendarIdChange.emit(calendarId);
+      this.serverSideSearchChange.emit(this.serverSideSearch());
+      this.fetchEvents(calendarId, this.serverSideSearch());
     } else {
       this.errorMessage.set('Calendar ID is required.');
     }

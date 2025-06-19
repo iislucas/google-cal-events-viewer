@@ -3,12 +3,11 @@
   "version": "0.0.1",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve google-cal-events-viewer-app",
     "start:wc": "ng serve google-cal-events-viewer-wc",
-    "build": "ng build",
+    "build": "ng build google-cal-events-viewer-app",
     "build:all": "npm run build && npm --prefix functions run build",
     "build:wc": "ng build google-cal-events-viewer-wc",
-    "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "deploy": "npm run build:all && firebase deploy",
     "deploy:hosting": "npm run build && firebase deploy --only hosting"

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "google-cal-events-viewer": {
+    "google-cal-events-viewer-app": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -75,10 +75,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "google-cal-events-viewer:build:production"
+              "buildTarget": "google-cal-events-viewer-app:build:production"
             },
             "development": {
-              "buildTarget": "google-cal-events-viewer:build:development"
+              "buildTarget": "google-cal-events-viewer-app:build:development"
             }
           },
           "defaultConfiguration": "development"

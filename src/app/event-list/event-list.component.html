@@ -20,7 +20,8 @@
     <input
       matInput
       id="serverSearch"
-      [(ngModel)]="inputServerSideSearch"
+      [ngModel]="serverSideSearch()"
+      (ngModelChange)="serverSideSearch.set($event)"
       placeholder="Enter search term for server"
     />
   </mat-form-field>
