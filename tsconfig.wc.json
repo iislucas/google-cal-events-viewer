@@ -6,6 +6,6 @@
     "outDir": "./out-tsc/app",
     "types": []
   },
-  "files": ["src/main.ts"],
+  "files": ["src/wc.ts"],
   "include": ["src/**/*.d.ts"]
 }

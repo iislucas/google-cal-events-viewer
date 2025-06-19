@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { registerIcons } from '../icons/register-icons';
 
 @Component({
   selector: 'app-event-item',
@@ -27,9 +28,19 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class EventItemComponent {
   event = input.required<CalendarEvent>();
-  isExpanded = signal(false);
+  readonly expandMoreName = 'expand_more';
+  readonly expandLessName = 'expand_less';
+  expandIconName = signal(this.expandMoreName);
 
   toggleExpansion(): void {
-    this.isExpanded.set(!this.isExpanded());
+    if (this.expandIconName() === this.expandLessName) {
+      this.expandIconName.set(this.expandMoreName);
+    } else {
+      this.expandIconName.set(this.expandLessName);
+    }
+  }
+
+  constructor() {
+    registerIcons(['map', 'event', this.expandMoreName, this.expandLessName]);
   }
 }

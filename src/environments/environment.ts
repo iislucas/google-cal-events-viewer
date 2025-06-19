@@ -2,12 +2,12 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: '',
-    measurementId: '',
+    apiKey: 'your api key here',
+    authDomain: 'not used',
+    projectId: 'a project id in here',
+    storageBucket: 'not used',
+    messagingSenderId: 'not used',
+    appId: 'the app id',
+    measurementId: 'the google analytics id here',
   },
 };

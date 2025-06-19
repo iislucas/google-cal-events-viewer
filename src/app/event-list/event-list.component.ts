@@ -18,6 +18,7 @@ import { CalendarEvent } from '../event.model';
 import MiniSearch from 'minisearch';
 import { EventItemComponent } from '../event-item/event-item.component';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { registerIcons } from '../icons/register-icons';
 
 function quotedFilter(result: CalendarEvent, quoted: string[]): boolean {
   // If there are no quoted terms, all results from MiniSearch are valid.
@@ -140,6 +141,48 @@ export class EventListComponent implements OnInit {
     return { matched, unmatched };
   });
 
+  constructor() {
+    registerIcons(['calendar_today']);
+
+    this.miniSearch = new MiniSearch<SearchableCalendarEvent>({
+      fields: ['title', 'location', 'start', 'end'],
+      storeFields: [
+        'id',
+        'title',
+        'start',
+        'end',
+        'location',
+        'description',
+        'googleMapsUrl',
+        'htmlLink',
+      ],
+      idField: 'id',
+    });
+  }
+
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const calendarId = params.get('calendarId');
+      let refetch = false;
+      if (calendarId && calendarId !== this.inputCalendarId()) {
+        refetch = true;
+      }
+      if (calendarId) {
+        this.inputCalendarId.set(calendarId);
+        const serverQuery = params.get('q') || '';
+        const clientQuery = params.get('client_q') || '';
+        this.serverSideSearch.set(serverQuery);
+        this.searchInput.set(clientQuery);
+        this.clientSideSearch.set(clientQuery);
+        if (refetch) {
+          this.fetchEvents(calendarId, serverQuery);
+        }
+      } else {
+        this.errorMessage.set('Please provide a Calendar ID to fetch events.');
+      }
+    });
+  }
+
   /**
    * Parses a search term into quoted and non-quoted parts.
    *
@@ -188,46 +231,6 @@ export class EventListComponent implements OnInit {
 
     const nonQuoted = nonQuotedParts.join(' ').trim().toLowerCase();
     return { quoted, nonQuoted };
-  }
-
-  constructor() {
-    this.miniSearch = new MiniSearch<SearchableCalendarEvent>({
-      fields: ['title', 'location', 'start', 'end'],
-      storeFields: [
-        'id',
-        'title',
-        'start',
-        'end',
-        'location',
-        'description',
-        'googleMapsUrl',
-        'htmlLink',
-      ],
-      idField: 'id',
-    });
-  }
-
-  ngOnInit(): void {
-    this.route.queryParamMap.subscribe((params) => {
-      const calendarId = params.get('calendarId');
-      let refetch = false;
-      if (calendarId && calendarId !== this.inputCalendarId()) {
-        refetch = true;
-      }
-      if (calendarId) {
-        this.inputCalendarId.set(calendarId);
-        const serverQuery = params.get('q') || '';
-        const clientQuery = params.get('client_q') || '';
-        this.serverSideSearch.set(serverQuery);
-        this.searchInput.set(clientQuery);
-        this.clientSideSearch.set(clientQuery);
-        if (refetch) {
-          this.fetchEvents(calendarId, serverQuery);
-        }
-      } else {
-        this.errorMessage.set('Please provide a Calendar ID to fetch events.');
-      }
-    });
   }
 
   async fetchEvents(calendarId: string, query?: string): Promise<void> {
