@@ -96,6 +96,20 @@ Copy & fill out `functions/src/environments/environment.template.ts`, saving it 
 
 ## Deploy
 
+Make the standalone web-component:
+
+```
+npm build:wc
+```
+
+Serve the standalone web-component for interactive testing:
+
+```
+npm start:wc
+```
+
+Deploy to firebase...
+
 ```
 npm run deploy
 ```
