@@ -1,47 +1,61 @@
-<mat-card appearance="outlined">
-  <mat-card-header (click)="toggleExpansion()">
-    <mat-card-title>{{ event().title }}</mat-card-title>
-    <mat-card-subtitle>
+<div class="card">
+  <div class="card-header">
+    <div class="card-title" (click)="toggleExpansion()">
+      <div class="title-text">{{ event().title }}</div>
+      <button class="icon-button">
+        <app-icon
+          [name]="expandIconName()"
+          [width]="'2em'"
+          [height]="'2em'"
+        ></app-icon>
+      </button>
+    </div>
+    <div class="card-subtitle">
       <div class="subtitle-group">
-        @if(event().start === event().end) {
-        <span>{{ event().start | date : "longDate" }}</span>
-        } @else {
+        <!-- date & icon link to cal -->
+        <span>
+          @if(event().start === event().end) {
+          {{ event().start | date : "mediumDate" }}
+          } @else {
+          {{ event().start | date : "mediumDate" }} -
+          {{ event().end | date : "mediumDate" }}
+          } @if(event().googleCalEventLink) {
+          <a
+            [href]="event().googleCalEventLink"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View on Google Calendar"
+          >
+            <app-icon name="event"></app-icon>
+          </a>
+          }
+        </span>
+
+        <!-- location & map link -->
+        @if(event().location) {
         <span
-          >{{ event().start | date : "longDate" }} -
-          {{ event().end | date : "longDate" }}</span
-        >
-        } @if(event().location) {
-        <span>{{ event().location }}</span>
-        } @if(event().googleMapsUrl) {
-        <a
-          [href]="event().googleMapsUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="View on Google Maps"
-        >
-          <mat-icon>map</mat-icon>
-        </a>
-        } @if(event().googleCalEventLink) {
-        <a
-          [href]="event().googleCalEventLink"
-          target="_blank"
-          rel="noopener noreferrer"
-          title="View on Google Calendar"
-        >
-          <mat-icon>event</mat-icon>
-        </a>
+          >{{ event().location }}
+
+          @if(event().googleMapsUrl) {
+          <a
+            [href]="event().googleMapsUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View on Google Maps"
+          >
+            <app-icon name="map"></app-icon>
+          </a>
+          }
+        </span>
         }
       </div>
-    </mat-card-subtitle>
-    <button mat-icon-button>
-      <mat-icon>{{ expandIconName() }}</mat-icon>
-    </button>
-  </mat-card-header>
+    </div>
+  </div>
   @if (expandIconName() === "expand_less") {
-  <mat-card-content>
+  <div class="card-content">
     <div class="description">
       <span [innerHTML]="event().description"></span>
     </div>
-  </mat-card-content>
+  </div>
   }
-</mat-card>
+</div>

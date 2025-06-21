@@ -11,17 +11,12 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GoogleCalendarService } from '../google-calendar.service';
 import { CalendarEvent } from '../event.model';
 import MiniSearch from 'minisearch';
 import { EventItemComponent } from '../event-item/event-item.component';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { registerIcons } from '../icons/register-icons';
 
+import { IconComponent } from '../icon/icon.component';
 function quotedFilter(result: CalendarEvent, quoted: string[]): boolean {
   // If there are no quoted terms, all results from MiniSearch are valid.
   if (quoted.length === 0) {
@@ -54,21 +49,8 @@ type SearchableCalendarEvent = CalendarEvent & { id: string };
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    EventItemComponent,
-    MatInputModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
-  ],
-  providers: [
-    {
-      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: { subscriptSizing: 'dynamic' },
-    },
-  ],
+  imports: [CommonModule, FormsModule, EventItemComponent, IconComponent],
+  providers: [],
   templateUrl: './event-list.component.html',
   styleUrl: './event-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -152,8 +134,6 @@ export class EventListComponent {
   });
 
   constructor() {
-    registerIcons(['calendar_today']);
-
     this.miniSearch = new MiniSearch<SearchableCalendarEvent>({
       fields: ['title', 'location', 'start', 'end'],
       storeFields: [

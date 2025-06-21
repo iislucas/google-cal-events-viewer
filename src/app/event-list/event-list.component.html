@@ -4,57 +4,47 @@
 </div>
 } @if (needCalendarId()) {
 <div class="search-container">
-  <mat-form-field>
-    <mat-label>Calendar ID</mat-label>
-    <input
-      matInput
-      matInput
-      id="calendarId"
-      [ngModel]="inputCalendarId()"
-      (ngModelChange)="inputCalendarId.set($event)"
-      placeholder="Enter Calendar ID"
-    />
-  </mat-form-field>
-  <mat-form-field>
-    <mat-label>Server-side Search</mat-label>
-    <input
-      matInput
-      id="serverSearch"
-      [ngModel]="serverSideSearch()"
-      (ngModelChange)="serverSideSearch.set($event)"
-      placeholder="Enter search term for server"
-    />
-  </mat-form-field>
-  <button mat-raised-button (click)="submitParameters()">Fetch Events</button>
+  <label for="calendarId">Calendar ID</label>
+  <input
+    id="calendarId"
+    [ngModel]="inputCalendarId()"
+    (ngModelChange)="inputCalendarId.set($event)"
+    placeholder="Enter Calendar ID"
+  />
+  <label for="serverSearch">Server-side Search</label>
+  <input
+    id="serverSearch"
+    [ngModel]="serverSideSearch()"
+    (ngModelChange)="serverSideSearch.set($event)"
+    placeholder="Enter search term for server"
+  />
+  <button (click)="submitParameters()">Fetch Events</button>
 </div>
 } @else {
 <div class="search-container">
-  <mat-form-field>
-    <mat-label>Search events</mat-label>
-    <input
-      matInput
-      type="text"
-      [ngModel]="searchInput()"
-      (ngModelChange)="onSearchInputChange($event)"
-      name="searchTerm"
-    />
-  </mat-form-field>
+  <label for="searchTerm">Search events</label>
+  <input
+    type="text"
+    id="searchTerm"
+    [ngModel]="searchInput()"
+    (ngModelChange)="onSearchInputChange($event)"
+    name="searchTerm"
+  />
   @if (inputCalendarId()) {
   <a
-    mat-icon-button
-    href="https://calendar.google.com/calendar/embed?height=600&wkst=2&ctz=Europe%2FParis&mode=AGENDA&src={{
+    href="https://calendar.google.com/calendar/embed?mode=AGENDA&src={{
       inputCalendarId()
-    }}&color=%23f6bf26"
+    }}"
     target="_blank"
     aria-label="Open in Google Calendar"
   >
-    <mat-icon>calendar_today</mat-icon>
+    <app-icon name="calendar_today"></app-icon>
   </a>
   }
 </div>
 } @if (isLoading()) {
 <div class="spinner-container">
-  <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  <div class="spinner"></div>
 </div>
 } @else if (searchResults().matched.length === 0 &&
 searchResults().unmatched.length === 0 && !errorMessage() && !needCalendarId())
