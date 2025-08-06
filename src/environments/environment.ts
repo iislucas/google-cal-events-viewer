@@ -10,4 +10,5 @@ export const environment = {
     appId: 'the app id',
     measurementId: 'the google analytics id here',
   },
+  defaultCalendarId: 'the default calendar id here',
 };

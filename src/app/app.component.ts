@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventListComponent } from './event-list/event-list.component';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -15,7 +16,7 @@ export class AppComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private queryParams = toSignal(this.route.queryParams);
-  readonly calendarId = signal('');
+  readonly calendarId = signal(environment.defaultCalendarId);
   readonly clientQuery = signal('');
   readonly serverQuery = signal('');
 
@@ -26,7 +27,9 @@ export class AppComponent {
         return;
       } else {
         console.log('params', params);
-        this.calendarId.set(params['calendarId'] || '');
+        this.calendarId.set(
+          params['calendarId'] || environment.defaultCalendarId
+        );
         this.clientQuery.set(params['q'] || '');
         this.serverQuery.set(params['qServer'] || '');
       }

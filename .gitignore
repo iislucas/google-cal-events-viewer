@@ -19,6 +19,8 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+pglite-debug.log
+firebase-debug.log
 
 # Visual Studio Code
 .vscode/*
