@@ -1,40 +1,21 @@
 import { Injectable } from '@angular/core';
 import { CalendarEvent } from './event.model'; // Import the interface
-import {
-  connectFunctionsEmulator,
-  getFunctions,
-  HttpsCallable,
-  httpsCallable,
-} from 'firebase/functions';
+import { getFunctions, HttpsCallable, httpsCallable } from 'firebase/functions';
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { environment } from '../environments/environment';
-
-// Define interfaces for the Google Calendar API response
-interface GoogleCalendarEventItem {
-  summary?: string;
-  start?: {
-    dateTime?: string;
-    date?: string;
-  };
-  end?: {
-    dateTime?: string;
-    date?: string;
-  };
-  description?: string;
-  location?: string;
-  htmlLink: string;
-}
-interface GoogleCalendarResponse {
-  items?: GoogleCalendarEventItem[];
-}
+import {
+  GetCalendarEventsRequest,
+  GoogleCalendarEventItem,
+  GoogleCalendarResponse,
+} from '../../functions/src/common-types';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GoogleCalendarService {
   getCalendarEvents: HttpsCallable<
-    { calendarId: string; q?: string },
+    GetCalendarEventsRequest,
     GoogleCalendarResponse
   >;
 
