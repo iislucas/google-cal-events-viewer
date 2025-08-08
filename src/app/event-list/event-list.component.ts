@@ -16,7 +16,7 @@ import { CalendarEvent } from '../event.model';
 import MiniSearch from 'minisearch';
 import { EventItemComponent } from '../event-item/event-item.component';
 
-import { IconComponent } from '../icon/icon.component';
+import { IconComponent } from '../icons/icon.component';
 function quotedFilter(result: CalendarEvent, quoted: string[]): boolean {
   // If there are no quoted terms, all results from MiniSearch are valid.
   if (quoted.length === 0) {

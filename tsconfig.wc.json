@@ -3,9 +3,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/app",
+    "outDir": "./out-tsc/wc",
     "types": []
   },
-  "files": ["src/wc.ts"],
-  "include": ["src/**/*.d.ts"]
+  "include": ["src/calendar.wc.ts", "src/**/*.d.ts"]
 }

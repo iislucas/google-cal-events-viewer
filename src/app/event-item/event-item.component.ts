@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { CalendarEvent } from '../event.model';
 import { DatePipe } from '@angular/common';
-import { IconComponent } from '../icon/icon.component';
+import { IconComponent } from '../icons/icon.component';
 
 @Component({
   selector: 'app-event-item',

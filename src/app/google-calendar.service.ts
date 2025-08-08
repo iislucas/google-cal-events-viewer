@@ -28,7 +28,10 @@ export class GoogleCalendarService {
     // For debugging with a local emulator...
     // connectFunctionsEmulator(functions, '127.0.0.1', 5001); // Use the port from emulator output
 
-    this.getCalendarEvents = httpsCallable(functions, 'getCalendarEvents');
+    this.getCalendarEvents = httpsCallable<
+      GetCalendarEventsRequest,
+      GoogleCalendarResponse
+    >(functions, 'getCalendarEvents');
   }
 
   async getPublicCalendarEvents(

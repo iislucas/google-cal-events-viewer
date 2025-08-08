@@ -6,7 +6,7 @@ import {
   GetCalendarEventsRequest,
   GoogleCalendarResponse,
 } from './common-types';
-const calendarApiKey = defineSecret('GOOGLE_CALENDAR_API_KEY');
+export const calendarApiKey = defineSecret('GOOGLE_CALENDAR_API_KEY');
 
 /**
  * Fetches events from a public Google Calendar.

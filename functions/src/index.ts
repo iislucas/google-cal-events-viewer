@@ -8,11 +8,8 @@
  */
 
 import { onCall } from 'firebase-functions/v2/https';
-import { defineSecret } from 'firebase-functions/params';
 import { environment } from './environment/environment';
-import { getCalendarEventsCallFn } from './get-calendar';
-const calendarApiKey = defineSecret('GOOGLE_CALENDAR_API_KEY');
-
+import { calendarApiKey, getCalendarEventsCallFn } from './get-calendar';
 const allowedOrigins = environment.domains;
 if (process.env.GCLOUD_PROJECT) {
   allowedOrigins.push(`https://${process.env.GCLOUD_PROJECT}.web.app`);

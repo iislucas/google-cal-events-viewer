@@ -105,7 +105,7 @@
         }
       }
     },
-    "google-cal-events-viewer-wc": {
+    "google-cal-events-viewer-calendar-wc": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -119,9 +119,9 @@
         "build": {
           "builder": "ngx-build-plus:browser",
           "options": {
-            "outputPath": "dist/google-cal-events-viewer/wc",
+            "outputPath": "dist/google-cal-events-viewer/calendar.wc",
             "index": "src/wc-index.html",
-            "main": "src/wc.ts",
+            "main": "src/calendar.wc.ts",
             "polyfills": [],
             "tsConfig": "tsconfig.wc.json",
             "inlineStyleLanguage": "scss",
@@ -177,10 +177,10 @@
           "builder": "ngx-build-plus:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "google-cal-events-viewer-wc:build:production"
+              "buildTarget": "google-cal-events-viewer-calendar-wc:build:production"
             },
             "development": {
-              "buildTarget": "google-cal-events-viewer-wc:build:development"
+              "buildTarget": "google-cal-events-viewer-calendar-wc:build:development"
             }
           },
           "defaultConfiguration": "development"

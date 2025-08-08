@@ -80,8 +80,12 @@ Set the calendar API key by running the command
 firebase functions:secrets:set GOOGLE_CALENDAR_API_KEY
 # You will then be asked to enter the API key secret, do that.
 
+# You See the version numbers for secrets with
+gcloud secrets versions list GOOGLE_CALENDAR_API_KEY
+# Set the version using the latest version shown by the above command
+GOOGLE_CALENDAR_API_KEY_VERSION=5
 # You can preview the secret...
-gcloud secrets versions access 5 --secret=GOOGLE_CALENDAR_API_KEY
+gcloud secrets versions access ${GOOGLE_CALENDAR_API_KEY_VERSION} --secret=GOOGLE_CALENDAR_API_KEY
 ```
 
 ### Client side envionment
@@ -115,7 +119,8 @@ gsutil cors get gs://${BUCKET_NAME}
 Make the standalone web-component:
 
 ```
-npm build:wc
+# build the calendar web component
+npm run build:wc
 ```
 
 Copy file to your cloud bucket...
@@ -123,13 +128,15 @@ Copy file to your cloud bucket...
 ```
 BUCKET_NAME_AND_PATH=...
 
-gcloud storage cp -R ./dist/google-cal-events-viewer/wc/* gs://${BUCKET_NAME_AND_PATH}
+# for the calendar component
+gcloud storage cp -R ./dist/google-cal-events-viewer/calendar-wc/* gs://${BUCKET_NAME_AND_PATH}
 ```
 
-For testing, you can serve the standalone web-component for interactive testing:
+For testing, you can serve the standalone web-components for interactive testing:
 
 ```
-npm start:wc
+# serve the calendar web component
+npm run start:wc
 ```
 
 ### Deploy to FireBase

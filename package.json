@@ -4,11 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve google-cal-events-viewer-app",
-    "start:wc": "ng serve google-cal-events-viewer-wc",
+    "start:wc": "ng serve google-cal-events-viewer-calendar-wc",
     "build": "ng build google-cal-events-viewer-app",
     "build:functions": "npm --prefix functions run build",
     "build:all": "npm run build && npm run build:wc && npm run build:functions",
-    "build:wc": "ng build google-cal-events-viewer-wc",
+    "build:wc": "ng build google-cal-events-viewer-calendar-wc",
     "test": "ng test",
     "deploy": "npm run build:all && firebase deploy",
     "deploy:functions": "npm run build:functions && firebase deploy --only functions",
