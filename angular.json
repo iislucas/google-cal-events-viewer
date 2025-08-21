@@ -119,7 +119,7 @@
         "build": {
           "builder": "ngx-build-plus:browser",
           "options": {
-            "outputPath": "dist/google-cal-events-viewer/calendar.wc",
+            "outputPath": "dist/google-cal-events-viewer/wc",
             "index": "src/wc-index.html",
             "main": "src/calendar.wc.ts",
             "polyfills": [],

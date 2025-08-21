@@ -21,8 +21,9 @@ export class GoogleCalendarService {
 
   constructor() {
     // Initialize Firebase
+    console.log('environment.firebase:', environment.firebase);
     const app = initializeApp(environment.firebase);
-    const analytics = getAnalytics(app);
+    // const analytics = getAnalytics(app);
     const functions = getFunctions(app);
 
     // For debugging with a local emulator...

@@ -76,6 +76,7 @@ gcloud auth application-default login
 See [Secret Manager](https://console.developers.google.com/apis/api/secretmanager.googleapis.com/overview).
 
 Set the calendar API key by running the command
+
 ```sh
 firebase functions:secrets:set GOOGLE_CALENDAR_API_KEY
 # You will then be asked to enter the API key secret, do that.
@@ -103,14 +104,13 @@ Copy & fill out `functions/src/environments/environment.template.ts`, saving it 
 If you want to deploy the standalone webcomponent to a cloud storage web-bucket,
 copy and edit the `src/environments/gcloud-cors-config.template.json` file to be
 `src/environments/gcloud-cors-config.json`, then deploy the changes to cloud
-with: 
+with:
 
 ```
 BUCKET_NAME=...
 gsutil cors set src/environments/gcloud-cors-config.json gs://${BUCKET_NAME}
 gsutil cors get gs://${BUCKET_NAME}
 ```
-
 
 ## Deploy
 
@@ -126,10 +126,10 @@ npm run build:wc
 Copy file to your cloud bucket...
 
 ```
-BUCKET_NAME_AND_PATH=...
+CALENDAR_BUCKET_NAME_AND_PATH=...
 
 # for the calendar component
-gcloud storage cp -R ./dist/google-cal-events-viewer/calendar-wc/* gs://${BUCKET_NAME_AND_PATH}
+gcloud storage cp -R ./dist/google-cal-events-viewer/wc/* gs://${CALENDAR_BUCKET_NAME_AND_PATH}
 ```
 
 For testing, you can serve the standalone web-components for interactive testing:

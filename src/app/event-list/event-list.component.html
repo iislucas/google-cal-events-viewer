@@ -22,14 +22,16 @@
 </div>
 } @else {
 <div class="search-container">
-  <label for="searchTerm">Search events</label>
-  <input
-    type="text"
-    id="searchTerm"
-    [ngModel]="searchInput()"
-    (ngModelChange)="onSearchInputChange($event)"
-    name="searchTerm"
-  />
+  <div class="search-box">
+    <app-icon class="search-icon" name="search"></app-icon>
+    <input
+      type="text"
+      id="searchTerm"
+      [ngModel]="searchInput()"
+      (ngModelChange)="onSearchInputChange($event)"
+      name="searchTerm"
+    />
+  </div>
   @if (inputCalendarId()) {
   <a
     href="https://calendar.google.com/calendar/embed?mode=AGENDA&src={{
@@ -56,11 +58,9 @@ searchResults().unmatched.length === 0 && !errorMessage() && !needCalendarId())
 <div>
   <!-- Matched Events -->
   @if (searchResults().matched.length > 0) {
-  <div>
+  <div class="event-list">
     @for (event of searchResults().matched; track event.id) {
-    <div>
-      <app-event-item [event]="event" />
-    </div>
+    <app-event-item [event]="event" />
     }
   </div>
   }
@@ -69,11 +69,9 @@ searchResults().unmatched.length === 0 && !errorMessage() && !needCalendarId())
   @if (searchResults().unmatched.length > 0) {
   <hr />
   <h2>Other Events</h2>
-  <div>
+  <div class="event-list">
     @for (event of searchResults().unmatched; track event.id) {
-    <div>
-      <app-event-item [event]="event" />
-    </div>
+    <app-event-item [event]="event" />
     }
   </div>
   }
